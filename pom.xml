@@ -14,6 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<scala.version>2.11.5</scala.version>
 		<java.version>1.7</java.version>
+		<main.class>LogProcess</main.class>
 	</properties>
 
 	<dependencies>
@@ -49,6 +50,71 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<id>win</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<minimizeJar>false</minimizeJar>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>${main.class}</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>com.akathist.maven.plugins.launch4j</groupId>
+				<artifactId>launch4j-maven-plugin</artifactId>
+				<version>1.5.2</version>
+				<executions>
+					<execution>
+						<id>l4j-clui</id>
+						<phase>package</phase>
+						<goals>
+							<goal>launch4j</goal>
+						</goals>
+						<configuration>
+							<headerType>console</headerType>
+							<outfile>target/LogParser.exe</outfile>
+							<classPath>
+								<mainClass>${main.class}</mainClass>
+								<addDependencies>true</addDependencies>
+								<preCp>anything</preCp>
+							</classPath>
+							<jre>
+								<minVersion>${java.version}.0</minVersion>
+								<opts>
+									<opt>-Xmx900m</opt>
+								</opts>
+							</jre>
+							<versionInfo>
+								<fileVersion>0.0.0.1</fileVersion>
+								<txtFileVersion>${project.version}</txtFileVersion>
+								<fileDescription>Log Parser</fileDescription>
+								<productVersion>0.0.0.1</productVersion>
+								<txtProductVersion>${project.version}</txtProductVersion>
+								<productName>Log Parser</productName>
+								<copyright>Atos Worldline</copyright>
+								<internalName>LogParser</internalName>
+								<originalFilename>LogParser.exe</originalFilename>
+							</versionInfo>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
