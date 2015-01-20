@@ -17,14 +17,18 @@
 		<main.class>LogProcess</main.class>
 	</properties>
 
+	<scm>
+		<connection>scm:git:https://github.com/tyrcho/Log4jdbcParser</connection>
+		<developerConnection>scm:git:https://github.com/tyrcho/Log4jdbcParser</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+
 	<dependencies>
 		<dependency>
 			<artifactId>scala-library</artifactId>
 			<groupId>org.scala-lang</groupId>
 			<version>${scala.version}</version>
 		</dependency>
-
-
 	</dependencies>
 
 	<build>
@@ -35,6 +39,15 @@
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>3.1.6</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<tagNameFormat>v@{project.version}</tagNameFormat>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
