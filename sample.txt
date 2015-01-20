@@ -1,0 +1,25 @@
+33215 Total requests
+742 update requests
+total time : 2 seconds
+1 update (376 ms) : OPC_CNT_DIFF set CURT_DTE=to_timestamp('01/20/2015 15:32:40.267', 'mm/dd/yyyy hh24:mi:ss.ff3') where ID=479295 
+2 update (114 ms) : OPC_CNT_ELT set FK_CNT_ACV_ID=NULL, ARTF_STA=NULL where ID=1000000000055025 
+...
+--SAME--
+1 update (376 ms) : OPC_CNT_DIFF set CURT_DTE=to_timestamp('01/20/2015 15:32:40.267', 'mm/dd/yyyy hh24:mi:ss.ff3') where ID=479295 
+2 update (114 ms) : OPC_CNT_ELT set FK_CNT_ACV_ID=NULL, ARTF_STA=NULL where ID=1000000000055025 
+--SIMILAR--
+163 update (716 ms) : OPC_CNT_DIFF set CURT_DTE
+90 update (473 ms) : AC_ACC set CUS_ADR_REF
+108 update (354 ms) : OPC_CNT_ELT set FK_CNT_ACV_ID
+27 update (160 ms) : CMS_ORD set CANCD_EXTRCT_DTE
+99 update (143 ms) : AC_ACC_CPO set FK_ACC_ID
+45 update (111 ms) : CMS_CRT_CNT set ACTN_DTE
+27 update (86 ms) : CUS_CUS_ADR set ACT
+36 update (85 ms) : CMS_CRT_CNT_VER set ACTN_DTE
+18 update (85 ms) : OPC_CNT set ACC_HCY_ID
+27 update (63 ms) : CUS_CUS set ACT
+()
+9778 insert requests
+total time : 11 seconds
+1 insert (364 ms) : into CMS_SELTD_MDL (FK_CRT_MDL_ID, FK_CNT_VER_ID, ID) values (2000000000001016, 2000000000079013, 2000000000214110) 
+...
