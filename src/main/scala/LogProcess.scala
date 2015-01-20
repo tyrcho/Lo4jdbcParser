@@ -1,8 +1,13 @@
 import java.io.FileWriter
 
 object LogProcess extends App {
-  val lines = joinLines(io.Source.fromFile("""t:\log4jdbc.txt""").getLines)
-  val out = new FileWriter("t:/analysis.txt")
+  if (args.size < 2) {
+    System.err.println("Arguments : input_file output_file")
+    System.exit(1)
+  }
+  val (input, output) = (args(0), args(1))
+  val lines = joinLines(io.Source.fromFile(input).getLines)
+  val out = new FileWriter(output)
 
   def println(a: Any) = {
     System.out.println(a)
@@ -11,10 +16,13 @@ object LogProcess extends App {
     out.flush()
   }
 
-  val requests = for {
-    l <- lines //.take(10000)
+  val requests = (for {
+    l <- lines
     e <- lineToEntry(l)
-  } yield e
+  } yield e).toList
+
+  val total = requests.map(_.count).sum
+  println(s"$total Total requests")
 
   for ((key, req) <- requests.toList.groupBy(_.key)) {
     val count = req.map(_.count).sum
