@@ -16,7 +16,8 @@ Configure your JDBC driver and logs as described on the [log4jdbc](https://code.
 
 Run your application and get a log file.
 
-run from a cmd line : ```
+run from a cmd line : 
+```
 LogParser.exe logfile.txt analysis.txt
 ```
 
