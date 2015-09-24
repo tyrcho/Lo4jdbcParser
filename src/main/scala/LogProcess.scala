@@ -26,7 +26,13 @@ object LogProcess extends App {
   val total = requests.map(_.count).sum
   println(s"$total Total requests")
 
-  for ((key, req) <- requests.toList.groupBy(_.key)) {
+  def order[T](elt: (String, T)): Int = {
+    val key = elt._1
+    if (key.toLowerCase == "select") -1 
+    else key.head.toInt
+  }
+
+  for ((key, req) <- requests.toList.groupBy(_.key).toList.sortBy(order)) {
     val count = req.map(_.count).sum
     println(s"$count $key requests")
     val total = req.map(_.time).sum / 1000
