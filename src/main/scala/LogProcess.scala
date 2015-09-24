@@ -1,4 +1,5 @@
 import java.io.FileWriter
+import scala.io.Codec
 
 object LogProcess extends App {
   if (args.size < 2) {
@@ -48,6 +49,7 @@ object LogProcess extends App {
     l match {
       case batchRe(count, key, request, time) => Some(Entry(key, time.toInt, request, count.toInt))
       case simpleRe(key, request, time) => Some(Entry(key, time.toInt, request))
+      case _ => None 
     }
   }
 
