@@ -22,5 +22,12 @@ Run it from a cmd line :
 ```
 LogParser.exe logfile.txt analysis.txt
 ```
+It will use UTF-8 charset by default to parse the logfile.txt
+
+
+Or to specify a [valid charset](http://docs.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html)
+```
+LogParser.exe logfile.txt analysis.txt ISO-8859-1
+```
 
 It creates the analysis.txt file.
