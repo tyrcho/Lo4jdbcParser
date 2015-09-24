@@ -3,11 +3,12 @@ import scala.io.Codec
 
 object LogProcess extends App {
   if (args.size < 2) {
-    System.err.println("Arguments : input_file output_file")
+    System.err.println("Arguments : input_file output_file [Codec]")
     System.exit(1)
   }
   val (input, output) = (args(0), args(1))
-  val lines = joinLines(io.Source.fromFile(input).getLines)
+  val codec = if (args.size < 2) Codec.UTF8 else Codec(args(2))
+  val lines = joinLines(io.Source.fromFile(input)(codec).getLines)
   val out = new FileWriter(output)
 
   def println(a: Any) = {
@@ -48,8 +49,8 @@ object LogProcess extends App {
     val batchRe = """.* - .*\. batching (\d*) statements: \d*: (\w+) (.*) \{executed in (\d+) ms\}""".r
     l match {
       case batchRe(count, key, request, time) => Some(Entry(key, time.toInt, request, count.toInt))
-      case simpleRe(key, request, time) => Some(Entry(key, time.toInt, request))
-      case _ => None 
+      case simpleRe(key, request, time)       => Some(Entry(key, time.toInt, request))
+      case _                                  => None
     }
   }
 
@@ -66,10 +67,10 @@ object LogProcess extends App {
 
     lazy val uniquePart = {
       val sep = key match {
-        case "insert" => " values "
+        case "insert"            => " values "
         case "select" | "delete" => " where "
-        case "update" => "="
-        case _ => ""
+        case "update"            => "="
+        case _                   => ""
       }
       if (request.contains(sep)) request.substring(0, request.indexOf(sep))
       else request
