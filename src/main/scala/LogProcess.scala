@@ -54,8 +54,8 @@ object LogProcess extends App {
     val simpleRe = """.* - .*\. (\w+) (.*) \{executed in (\d+) ms\}""".r
     val batchRe = """.* - .*\. batching (\d*) statements: \d*: (\w+) (.*) \{executed in (\d+) ms\}""".r
     l match {
-      case batchRe(count, key, request, time) => Some(Entry(key, time.toInt, request, count.toInt))
-      case simpleRe(key, request, time)       => Some(Entry(key, time.toInt, request))
+      case batchRe(count, key, request, time) => Some(Entry(key.toUpperCase, time.toInt, request.toUpperCase, count.toInt))
+      case simpleRe(key, request, time)       => Some(Entry(key.toUpperCase, time.toInt, request.toUpperCase))
       case _                                  => None
     }
   }
