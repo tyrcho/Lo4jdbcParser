@@ -1,65 +1,49 @@
-import java.io.FileWriter
-import scala.io.Codec
-import java.io.File
-
 object LogProcess extends App {
+  Config.parse(args) match {
+    case Some(config) =>
+      (new LogProcess(config)).process()
 
-  case class Config(
-    input: String = "",
-    output: String = "",
-    codec: String = "UTF-8",
-    top: Int = 10)
-
-  val parser = new scopt.OptionParser[Config]("logparser") {
-    arg[String]("[input_file]") action { (x, c) => c.copy(input = x) }
-    arg[String]("[output_file]") action { (x, c) => c.copy(output = x) }
-    opt[String]('c', "codec") action { (x, c) => c.copy(codec = x) }
-    opt[Int]('t', "top") action { (x, c) => c.copy(top = x) }
+    case None => // arguments are bad, error message will have been displayed
   }
 
-  parser.parse(args, Config()) match {
-    case Some(config) =>
+}
 
-      val codec = Codec(config.codec)
-      val lines = joinLines(io.Source.fromFile(config.input)(codec).getLines)
-      val out = new FileWriter(config.output)
-      val topCount = config.top
+class LogProcess(config: Config) {
+  val codec = io.Codec(config.codec)
+  val lines = joinLines(io.Source.fromFile(config.input)(codec).getLines)
+  val out = new java.io.FileWriter(config.output)
+  val topCount = config.top
 
-      def println(a: Any) = {
-        System.out.println(a)
-        out.write(a.toString)
-        out.write("\n")
-        out.flush()
-      }
+  def process(): Unit = {
+    val requests = (for {
+      l <- lines
+      e <- lineToEntry(l)
+    } yield e).toList
 
-      val requests = (for {
-        l <- lines
-        e <- lineToEntry(l)
-      } yield e).toList
+    val total = requests.map(_.count).sum
+    println(s"$total Total requests")
 
-      val total = requests.map(_.count).sum
-      println(s"$total Total requests")
+    for ((key, req) <- requests.toList.groupBy(_.key).toList.sortBy(order)) {
+      val count = req.map(_.count).sum
+      println(s"$count $key requests")
+      val total = req.map(_.time).sum / 1000
+      println(s"total time : $total seconds")
 
-      for ((key, req) <- requests.toList.groupBy(_.key).toList.sortBy(order)) {
-        val count = req.map(_.count).sum
-        println(s"$count $key requests")
-        val total = req.map(_.time).sum / 1000
-        println(s"total time : $total seconds")
-        println(s"-- TOP $topCount requests, by time --")
+      printGroupOfRequests("requests, by time", req)
 
-        req.sortBy(-_.time).take(topCount).foreach(println)
+      val distinct = for ((r, entries) <- req.groupBy(_.request))
+        yield Entry(key, entries.map(_.time).sum, r, entries.map(_.count).sum)
+      printGroupOfRequests("requests, by total time for same requests", distinct.toList)
 
-        println(s"-- TOP $topCount requests, by total time for same requests --")
-        val distinct = for ((r, entries) <- req.groupBy(_.request)) yield Entry(key, entries.map(_.time).sum, r, entries.map(_.count).sum)
-        distinct.toList.sortBy(-_.time).take(topCount).foreach(println)
+      val unique = for ((r, entries) <- req.groupBy(_.uniquePart))
+        yield Entry(key, entries.map(_.time).sum, entries.head.uniquePart, entries.map(_.count).sum)
+      printGroupOfRequests("requests, by total time for similar (same statement, different values) requests", unique.toList)
+    }
+  }
 
-        println(s"-- TOP $topCount requests, by total time for similar (same statement, different values) requests --")
-        val unique = for ((r, entries) <- req.groupBy(_.uniquePart)) yield Entry(key, entries.map(_.time).sum, entries.head.uniquePart, entries.map(_.count).sum)
-        unique.toList.sortBy(-_.time).take(topCount).foreach(println)
-
-        println()
-      }
-    case None => // arguments are bad, error message will have been displayed
+  def printGroupOfRequests(title: String, requests: List[Entry]) {
+    println(s"-- TOP $topCount $title --")
+    requests.sortBy(-_.time).take(topCount).foreach(println)
   }
 
   def order[T](elt: (String, T)): Int = {
@@ -83,6 +67,7 @@ object LogProcess extends App {
     }
   }
 
+  //group lines until there is an empty line
   def joinLines(lines: Iterator[String]) = new Iterator[String] {
     def hasNext = lines.hasNext
     def next = {
@@ -90,19 +75,28 @@ object LogProcess extends App {
     }
   }
 
-  case class Entry(key: String, time: Int, request: String, count: Int = 1) {
-    override def toString =
-      s"$count $key ($time ms) : $request"
+  def println(a: Any) = {
+    System.out.println(a)
+    out.write(a.toString)
+    out.write("\n")
+    out.flush()
+  }
 
-    lazy val uniquePart = {
-      val sep = key match {
-        case "insert"            => " values "
-        case "select" | "delete" => " where "
-        case "update"            => "="
-        case _                   => ""
-      }
-      if (request.contains(sep)) request.substring(0, request.indexOf(sep))
-      else request
+}
+
+case class Entry(key: String, time: Int, request: String, count: Int = 1) {
+  override def toString =
+    s"$count $key ($time ms) : $request"
+
+  lazy val uniquePart = {
+    val sep = key match {
+      case "insert"            => " values "
+      case "select" | "delete" => " where "
+      case "update"            => "="
+      case _                   => ""
     }
+    if (request.contains(sep)) request.substring(0, request.indexOf(sep))
+    else request
   }
 }
+
