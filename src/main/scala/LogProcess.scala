@@ -29,8 +29,13 @@ object LogProcess extends App {
 
   def order[T](elt: (String, T)): Int = {
     val key = elt._1
-    if (key.toLowerCase == "select") -1 
-    else key.head.toInt
+    key.toLowerCase match {
+      case "select" => -4
+      case "insert" => -3
+      case "update" => -2
+      case "delete" => -1
+      case _        => key.head.toInt
+    }
   }
 
   for ((key, req) <- requests.toList.groupBy(_.key).toList.sortBy(order)) {
