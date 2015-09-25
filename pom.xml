@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>net.atos</groupId>
-	<version>0.2.1-SNAPSHOT</version>
+	<version>0.2.1</version>
 	<artifactId>log4jdbcparser</artifactId>
 
 	<packaging>jar</packaging>
@@ -19,7 +19,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/tyrcho/Log4jdbcParser</connection>
 		<developerConnection>scm:git:https://github.com/tyrcho/Log4jdbcParser</developerConnection>
-		<tag>HEAD</tag>
+		<tag>v0.2.1</tag>
 	</scm>
 
 	<dependencies>
