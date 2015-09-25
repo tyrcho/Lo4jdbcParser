@@ -11,6 +11,7 @@ object LogProcess extends App {
   val codec = if (args.size < 3) Codec.UTF8 else Codec(args(2))
   val lines = joinLines(io.Source.fromFile(input)(codec).getLines)
   val out = new FileWriter(output)
+  val topCount = 15
 
   def println(a: Any) = {
     System.out.println(a)
@@ -29,7 +30,7 @@ object LogProcess extends App {
 
   def order[T](elt: (String, T)): Int = {
     val key = elt._1
-    key.toLowerCase match {
+    key match {
       case "select" => -4
       case "insert" => -3
       case "update" => -2
@@ -43,15 +44,17 @@ object LogProcess extends App {
     println(s"$count $key requests")
     val total = req.map(_.time).sum / 1000
     println(s"total time : $total seconds")
-    req.sortBy(-_.time).take(10).foreach(println)
+    println(s"-- TOP $topCount requests, by time --")
 
-    println("--SAME--")
-    val distinct = for ((req, entries) <- req.groupBy(_.request)) yield Entry(key, entries.map(_.time).sum, req, entries.map(_.count).sum)
-    distinct.toList.sortBy(-_.time).take(10).foreach(println)
+    req.sortBy(-_.time).take(topCount).foreach(println)
 
-    println("--SIMILAR--")
-    val unique = for ((req, entries) <- req.groupBy(_.uniquePart)) yield Entry(key, entries.map(_.time).sum, req, entries.map(_.count).sum)
-    unique.toList.sortBy(-_.time).take(10).foreach(println)
+    println(s"-- TOP $topCount requests, by total time for same requests --")
+    val distinct = for ((r, entries) <- req.groupBy(_.request)) yield Entry(key, entries.map(_.time).sum, r, entries.map(_.count).sum)
+    distinct.toList.sortBy(-_.time).take(topCount).foreach(println)
+
+    println(s"-- TOP $topCount requests, by total time for similar (same statement, different values) requests --")
+    val unique = for ((r, entries) <- req.groupBy(_.uniquePart)) yield Entry(key, entries.map(_.time).sum, entries.head.uniquePart, entries.map(_.count).sum)
+    unique.toList.sortBy(-_.time).take(topCount).foreach(println)
 
     println()
   }
@@ -59,9 +62,9 @@ object LogProcess extends App {
   def lineToEntry(l: String) = {
     val simpleRe = """.* - .*\. (\w+) (.*) \{executed in (\d+) ms\}""".r
     val batchRe = """.* - .*\. batching (\d*) statements: \d*: (\w+) (.*) \{executed in (\d+) ms\}""".r
-    l match {
-      case batchRe(count, key, request, time) => Some(Entry(key.toUpperCase, time.toInt, request.toUpperCase, count.toInt))
-      case simpleRe(key, request, time)       => Some(Entry(key.toUpperCase, time.toInt, request.toUpperCase))
+    l.toLowerCase match {
+      case batchRe(count, key, request, time) => Some(Entry(key, time.toInt, request, count.toInt))
+      case simpleRe(key, request, time)       => Some(Entry(key, time.toInt, request))
       case _                                  => None
     }
   }
