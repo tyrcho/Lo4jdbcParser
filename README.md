@@ -20,14 +20,14 @@ Download [LogParser.exe](https://github.com/tyrcho/Log4jdbcParser/releases/lates
 
 Run it from a cmd line : 
 ```
-LogParser.exe logfile.txt analysis.txt
-```
-It will use UTF-8 charset by default to parse the logfile.txt
+Usage: logparser [options] [input_file] [output_file]
 
-
-Or to specify a [valid charset](http://docs.oracle.com/javase/7/docs/api/java/nio/charset/Charset.html)
+  -c <value> | --codec <value>
+        java Codec for input file, UTF-8 (default) and ISO-8859-1 are supported
+  -t <value> | --top <value>
+        top SQL statements to keep in output
+        
+Example: LogParser -c ISO-8859-1 logs\stdout.log out.txt
 ```
-LogParser.exe logfile.txt analysis.txt ISO-8859-1
-```
 
-It creates the analysis.txt file.
+It will create the out.txt file.
