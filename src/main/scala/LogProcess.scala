@@ -4,10 +4,11 @@ import scala.io.Codec
 object LogProcess extends App {
   if (args.size < 2) {
     System.err.println("Arguments : input_file output_file [Codec]")
+    System.err.println("Codec can be UTF-8 (default) or ISO-8859-1")
     System.exit(1)
   }
   val (input, output) = (args(0), args(1))
-  val codec = if (args.size < 2) Codec.UTF8 else Codec(args(2))
+  val codec = if (args.size < 3) Codec.UTF8 else Codec(args(2))
   val lines = joinLines(io.Source.fromFile(input)(codec).getLines)
   val out = new FileWriter(output)
 
